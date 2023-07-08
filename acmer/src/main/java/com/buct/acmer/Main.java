@@ -10,8 +10,8 @@ import java.util.Collections;
 public class Main {
     public static void main(String[] args) {
         String projectPath = System.getProperty("user.dir");
-        String url = "jdbc:mysql://127.0.0.1:3306/acm?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true";
-        FastAutoGenerator.create(url, "root", "123456")
+        String url = "jdbc:mysql://localhost:3306/acmer?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        FastAutoGenerator.create(url, "root", "20020326")
                 .globalConfig(builder -> {
                     builder.author("BUCT") // 设置作者
                             .enableSwagger() // 开启 swagger 模式

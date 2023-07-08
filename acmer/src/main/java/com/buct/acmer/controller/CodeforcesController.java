@@ -34,8 +34,8 @@ public class CodeforcesController {
 
     @ApiOperation("查询全部学生Codeforces信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "currentPage",value = "当前页数",required = true),
-            @ApiImplicitParam(name = "pageSize",value = "页面大小",required = true)
+            @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true)
     })
     @GetMapping("/all/{currentPage}/{pageSize}")
     public PublicProperty<Page<Codeforces>> selectAll(@PathVariable("currentPage") Integer currentPage,

@@ -32,8 +32,8 @@ public class StudentController {
 
     @ApiOperation("查询学生信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "currentPage",value = "当前页数",required = true),
-            @ApiImplicitParam(name = "pageSize",value = "页面大小",required = true)
+            @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true)
     })
     @GetMapping("/all/{currentPage}/{pageSize}")
     public PublicProperty<Page<Student>> selectAll(@PathVariable("currentPage") Integer currentPage,

@@ -19,6 +19,7 @@ public class KSwagger2Config {
      * knife4j配置文件
      * @return
      */
+    //配置Swagger的Bean实例
     @Bean
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -28,6 +29,7 @@ public class KSwagger2Config {
                 .build();
     }
 
+    //配置Swagger信息
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("AcmData")
