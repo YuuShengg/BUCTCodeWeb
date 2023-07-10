@@ -2,12 +2,10 @@ package com.buct.spider.codeforces;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.assist.ISqlRunner;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.buct.spider.entity.Atcoder;
-import com.buct.spider.entity.Codeforces;
-import com.buct.spider.entity.Student;
-import com.buct.spider.mapper.CodeforcesMapper;
-import com.buct.spider.mapper.StudentMapper;
+import com.buct.spider.entity.*;
+import com.buct.spider.mapper.*;
 import com.buct.spider.util.HttpRequest;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +21,12 @@ public class GetCfData {
     private StudentMapper studentMapper;
     @Resource
     private CodeforcesMapper codeforcesMapper;
-
+    @Resource
+    private CfproblemMapper cfproblemMapper;
+    @Resource
+    private CfcontestMapper cfcontestMapper;
+    @Resource
+    private CfratingMapper cfratingMapper;
     /**
      * 获取cf比赛数据，cf数据为json格式返回，不需要解析html页面
      */
@@ -60,7 +63,209 @@ public class GetCfData {
                         codeforcesMapper.update(codeforces,queryWrapper);
                     }
                 }
+
+                /**
+                 *  获取用户cf积分变化表
+                 *             "contestId": 1463,
+                 *             "contestName": "Educational Codeforces Round 100 (Rated for Div. 2)",
+                 *             "handle": "zpf666",
+                 *             "rank": 5392,
+                 *             "ratingUpdateTimeSeconds": 1608222900,
+                 *             "oldRating": 0,
+                 *             "newRating": 472
+                 */
+                // 获取json数据
+                String ratingData = HttpRequest.sendGet("https://codeforces.com/api/user.rating?handle=" + id);
+                JSONObject ratingJsonObject = JSONObject.parseObject(ratingData);
+                JSONArray ratingResult = ratingJsonObject.getJSONArray("result");
+
+                for(int j = 0; j <ratingResult.size(); j++) {
+                    JSONObject ratingJson = ratingResult.getJSONObject(j);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                    // 解析数据
+                    String contestId = ratingJson.getString("contestId");
+                    String contestName = ratingJson.getString("contestName");
+                    String handle = ratingJson.getString("handle");
+                    String rank = ratingJson.getString("rank");
+                    String ratingUpdateTimeSeconds = simpleDateFormat.format(new Date(ratingJson.getLong("ratingUpdateTimeSeconds") * 1000));
+                    String oldRating = ratingJson.getString("oldRating");
+                    String newRating = ratingJson.getString("newRating");
+
+                    // 封装成Cfrating对象
+                    Cfrating cfrating = new Cfrating();
+                    cfrating.setCfContestId(contestId);
+                    cfrating.setCfContestName(contestName);
+                    cfrating.setCfUserId(handle);
+                    cfrating.setCfRank(rank);
+                    cfrating.setCfUpdateTime(ratingUpdateTimeSeconds);
+                    cfrating.setCfOldRating(oldRating);
+                    cfrating.setCfNewRating(newRating);
+
+                    // 存入数据库
+                    QueryWrapper<Cfrating> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("cf_contest_id", contestId)
+                            .eq("cf_user_id", handle);
+                    Cfrating exist = cfratingMapper.selectOne(queryWrapper);
+                    if(exist==null){
+                        cfratingMapper.insert(cfrating);
+                    }else {
+                        cfratingMapper.update(cfrating,queryWrapper);
+                    }
+                }
             }
         }
     }
+
+    /**
+     *   获取cf题目信息
+    */
+    public void getProblem() {
+        // 发送请求获取题目列表数据
+        String data = HttpRequest.sendGet("https://codeforces.com/api/problemset.problems");
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        JSONObject result = jsonObject.getJSONObject("result");
+        JSONArray problems = result.getJSONArray("problems");
+
+        // 遍历题目列表
+        for (int i = 0; i < problems.size(); i++) {
+            JSONObject problemJson = problems.getJSONObject(i);
+
+            // 解析题目数据
+            String contestId = problemJson.getString("contestId");
+            String index = problemJson.getString("index");
+            String name = problemJson.getString("name");
+            String type = problemJson.getString("type");
+            Integer points = problemJson.getInteger("points");
+            Integer rating = problemJson.getInteger("rating");
+            JSONArray tagsArray = problemJson.getJSONArray("tags");
+        //  List<String> tags = tagsArray.toJavaList(String.class);
+            String tags = tagsArray.toJSONString();
+
+            // 判断是否为空
+            int ratingValue = -1;
+            int pointsValue = -1;
+            if (rating != null) {
+                ratingValue = rating.intValue();
+            }
+            if (points != null) {
+                pointsValue = points.intValue();
+            }
+
+            // 创建题目对象并设置数据
+            Cfproblem problem = new Cfproblem();
+            problem.setCfContestId(contestId);
+            problem.setCfIndex(index);
+            problem.setCfName(name);
+            problem.setCfType(type);
+            problem.setCfPoints(pointsValue);
+            problem.setCfRating(ratingValue);
+            problem.setCfTags(tags);
+
+            // 存入数据库中
+            QueryWrapper<Cfproblem> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("cf_index", index)
+                    .eq("cf_contest_id", contestId);
+
+            Cfproblem exist = cfproblemMapper.selectOne(queryWrapper);
+            if (exist == null) {
+                // 不存在，进行插入操作
+                cfproblemMapper.insert(problem);
+            } else {
+                // 已存在，进行更新操作
+                cfproblemMapper.update(problem, queryWrapper);
+            }
+        }
+    }
+
+    /**
+     * 获取cf竞赛信息
+     */
+    public void getContest() {
+        String data = HttpRequest.sendGet("https://codeforces.com/api/contest.list?gym=false");
+        JSONObject jsonObject = JSONObject.parseObject(data);
+        JSONArray result = jsonObject.getJSONArray("result");
+
+        // 遍历竞赛列表
+        for(int i = 0; i < result.size(); i++) {
+            JSONObject contestJson = result.getJSONObject(i);
+
+            // 解析竞赛数据
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String contestId = contestJson.getString("id");
+            String contestName = contestJson.getString("name");
+            String contestType = contestJson.getString("type");
+            String contestPhase = contestJson.getString("phase");
+            Boolean contestFrozen = contestJson.getBoolean("frozen");
+            String contestStartTimeSeconds = simpleDateFormat.format(new Date(contestJson.getLong("startTimeSeconds") * 1000));
+            Integer durationSeconds = contestJson.getInteger("durationSeconds");
+            Integer hour = durationSeconds / 60 / 60;
+            Integer minutes = durationSeconds / 60 % 60;
+            Integer seconds = durationSeconds % 60;
+            String contestDurationSeconds = hour+":"+minutes+":"+seconds;
+            Integer contestRelativeTimeSeconds = contestJson.getInteger("relativeTimeSeconds");
+            Integer contestParticipantsnumber = 0;
+
+            if(contestPhase.equals("FINISHED")) {
+                List<Student> students = studentMapper.selectList(null);
+                for (int j = 0; j < students.size(); j++) {
+                    String studentId = students.get(j).getStuCfId();
+                    if (studentId != null && !studentId.equals("")) {
+
+                        QueryWrapper<Cfrating> queryWrapper = new QueryWrapper<>();
+                        queryWrapper.eq("cf_contest_id", contestId)
+                                .eq("cf_user_id", studentId);
+                        Cfrating exist = cfratingMapper.selectOne(queryWrapper);
+                        if(exist != null) {
+                            contestParticipantsnumber++;
+                        }
+
+
+                        /**
+                        String contestData = HttpRequest.sendGet("https://codeforces.com/api/contest.standings?contestId=" + contestId + "&handles=" + studentId);
+                        JSONObject contestDataJsonObject = JSONObject.parseObject(contestData);
+                        if(contestDataJsonObject == null) continue;
+                        JSONObject contestDataResult = contestDataJsonObject.getJSONObject("result");
+                    //    System.out.println("ContestResult:=========>"+contestDataResult);
+                        JSONArray rows = contestDataResult.getJSONArray("rows");
+                    //    System.out.println("rows:==========>"+rows);
+                        if (rows.size() == 0) {
+                            // continue;
+                        } else {
+                            contestParticipantsnumber++;
+                           // JSONObject row = rows.getJSONObject(0);
+                        }*/
+
+                    }
+                }
+            }
+
+            // 创建竞赛对象并设置数据
+            Cfcontest cfcontest = new Cfcontest();
+            cfcontest.setCfContestId(contestId);
+            cfcontest.setCfContestName(contestName);
+            cfcontest.setCfContestType(contestType);
+            cfcontest.setCfContestPhase(contestPhase);
+            cfcontest.setCfContestFrozen(contestFrozen);
+            cfcontest.setCfContestDurationseconds(contestDurationSeconds);
+            cfcontest.setCfContestStarttimeseconds(contestStartTimeSeconds);
+            cfcontest.setCfContestRelativetimeseconds(contestRelativeTimeSeconds);
+            cfcontest.setCfContestParticipantsnumber(contestParticipantsnumber);
+
+            // 存入数据库
+            QueryWrapper<Cfcontest> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("cf_contest_id", contestId);
+            Cfcontest exist = cfcontestMapper.selectOne(queryWrapper);
+            if (exist == null) {
+                // 不存在，进行插入操作
+                cfcontestMapper.insert(cfcontest);
+            } else {
+                // 已存在，进行更新操作
+                cfcontestMapper.update(cfcontest, queryWrapper);
+            }
+
+        }
+    }
+
+
 }

@@ -44,5 +44,11 @@ public class ScheduleConfig {
         getCfData.getInfo();
     }
 
+    @Scheduled(fixedRate =  1000*60*60*24*7)
+    private void CfProblemProcess() {getCfData.getProblem();}
+
+    @Scheduled(fixedRate = 1000*60*60*24*7)
+    private void CfContestProcess() {getCfData.getContest();}
 
 }
+
