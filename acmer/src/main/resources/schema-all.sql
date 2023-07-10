@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `atcoder` (
    `ac_maxRating` varchar(255) DEFAULT NULL COMMENT '最高积分',
    PRIMARY KEY (`ac_id`)
 );
-CREATE TABLE  IF NOT EXISTS `codeforces` (
+CREATE TABLE IF NOT EXISTS `codeforces` (
   `cf_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'id',
   `cf_contest` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛名称',
   `cf_contest_id` varchar(255) DEFAULT NULL COMMENT '比赛名称id',
@@ -28,4 +28,26 @@ CREATE TABLE  IF NOT EXISTS `codeforces` (
   `cf_sum_contest` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '参与比赛的总数',
   `cf_date` varchar(255) DEFAULT NULL COMMENT '日期',
   PRIMARY KEY (`cf_id`) USING BTREE
+);
+CREATE TABLE IF NOT EXISTS `cfproblem` (
+                             `cf_contest_id` varchar(255) DEFAULT NULL COMMENT '比赛名称id',
+                             `cf_index` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目索引',
+                             `cf_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目名称',
+                             `cf_type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目类型',
+                             `cf_points` int DEFAULT NULL COMMENT '比赛题目得分',
+                             `cf_rating` int DEFAULT NULL COMMENT '比赛题目评级',
+                             `cf_tags` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '比赛题目标签'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `cfcontest` (
+                             `cf_contest_id` varchar(255) NOT NULL COMMENT '比赛id',
+                             `cf_contest_name` varchar(255) DEFAULT NULL COMMENT '比赛名称',
+                             `cf_contest_type` varchar(255) DEFAULT NULL COMMENT '比赛类型',
+                             `cf_contest_phase` varchar(255) DEFAULT NULL COMMENT '比赛阶段',
+                             `cf_contest_frozen` tinyint DEFAULT NULL COMMENT '比赛是否冻结',
+                             `cf_contest_durationSeconds` varchar(255) DEFAULT NULL COMMENT '比赛持续时间',
+                             `cf_contest_startTimeSeconds` varchar(255) DEFAULT NULL COMMENT '比赛开始时间',
+                             `cf_contest_relativeTimeSeconds` int DEFAULT NULL COMMENT '比赛相对于现在的时间差',
+                             'cf_contest_participantsNumber' int DEFAULT NULL COMMENT '比赛参加人数',
+                             PRIMARY KEY (`cf_contest_id`)
 );

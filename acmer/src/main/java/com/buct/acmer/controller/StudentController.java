@@ -1,10 +1,8 @@
 package com.buct.acmer.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.buct.acmer.entity.Atcoder;
-import com.buct.acmer.entity.ContestInfo;
-import com.buct.acmer.entity.PublicProperty;
-import com.buct.acmer.entity.Student;
+import com.buct.acmer.entity.*;
 import com.buct.acmer.service.impl.StudentServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -13,6 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -41,6 +40,32 @@ public class StudentController {
 
         Page<Student> page = new Page<>(currentPage,pageSize);
         return new PublicProperty(200,"success",studentService.page(page));
+    }
+
+    @ApiOperation("按值查询学生信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true),
+            @ApiImplicitParam(name = "fieldName",value = "要查询的字段名",dataType = "String",required = true),
+            @ApiImplicitParam(name = "fieldValue",value = "字段值",dataType = "String",required = true)
+    })
+    @GetMapping("/all/select/{currentPage}/{pageSize}/{fieldName}/{fieldValue}")
+    public PublicProperty<Page<Student>> searchByField(@PathVariable("currentPage") Integer currentPage,
+                                                       @PathVariable("pageSize") Integer pageSize,
+                                                       @PathVariable("fieldName") String fieldName,
+                                                       @PathVariable("fieldValue") String fieldValue) {
+
+        Page<Student> page = new Page<>(currentPage,pageSize);
+        QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(fieldName, fieldValue);
+        Page<Student> resultPage = studentService.page(page, queryWrapper);
+        return new PublicProperty<>(200, "success", resultPage);
+        /**
+        QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(fieldName, fieldValue);
+        List<Student> resultList = studentService.list(queryWrapper);
+        return new PublicProperty<>(200, "success", resultList);
+         */
     }
 
     @ApiOperation("新增学生信息")
