@@ -48,6 +48,6 @@ CREATE TABLE IF NOT EXISTS `cfcontest` (
                              `cf_contest_durationSeconds` varchar(255) DEFAULT NULL COMMENT '比赛持续时间',
                              `cf_contest_startTimeSeconds` varchar(255) DEFAULT NULL COMMENT '比赛开始时间',
                              `cf_contest_relativeTimeSeconds` int DEFAULT NULL COMMENT '比赛相对于现在的时间差',
-                             'cf_contest_participantsNumber' int DEFAULT NULL COMMENT '比赛参加人数',
+                             `cf_contest_participantsNumber` int DEFAULT NULL COMMENT '比赛参加人数',
                              PRIMARY KEY (`cf_contest_id`)
 );
