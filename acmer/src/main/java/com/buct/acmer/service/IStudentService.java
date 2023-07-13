@@ -1,7 +1,9 @@
 package com.buct.acmer.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.buct.acmer.entity.Student;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.buct.acmer.entity.StudentDTO;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IStudentService extends IService<Student> {
 
+    Page<StudentDTO> getStudentAllInfo(int currentPage, int pageSize);
 }

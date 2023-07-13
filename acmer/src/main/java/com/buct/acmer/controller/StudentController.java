@@ -29,17 +29,30 @@ public class StudentController {
     @Resource
     private StudentServiceImpl studentService;
 
-    @ApiOperation("查询学生信息")
+    @ApiOperation("查询学生基本信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true)
+    })
+    @GetMapping("/base/{currentPage}/{pageSize}")
+    public PublicProperty<Page<StudentDTO>> selectBase(@PathVariable("currentPage") Integer currentPage,
+                                                   @PathVariable("pageSize") Integer pageSize){
+
+        Page<Student> page = new Page<>(currentPage,pageSize);
+        return new PublicProperty(200,"success",studentService.page(page));
+    }
+
+    @ApiOperation("查询学生全部信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
             @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true)
     })
     @GetMapping("/all/{currentPage}/{pageSize}")
-    public PublicProperty<Page<Student>> selectAll(@PathVariable("currentPage") Integer currentPage,
-                                                   @PathVariable("pageSize") Integer pageSize){
+    public PublicProperty<Page<StudentDTO>> selectAll(@PathVariable("currentPage") Integer currentPage,
+                                                      @PathVariable("pageSize") Integer pageSize){
 
-        Page<Student> page = new Page<>(currentPage,pageSize);
-        return new PublicProperty(200,"success",studentService.page(page));
+        Page<StudentDTO> page = studentService.getStudentAllInfo(currentPage, pageSize);
+        return new PublicProperty(200,"success", page);
     }
 
     @ApiOperation("按值查询学生信息")
@@ -60,12 +73,6 @@ public class StudentController {
         queryWrapper.eq(fieldName, fieldValue);
         Page<Student> resultPage = studentService.page(page, queryWrapper);
         return new PublicProperty<>(200, "success", resultPage);
-        /**
-        QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(fieldName, fieldValue);
-        List<Student> resultList = studentService.list(queryWrapper);
-        return new PublicProperty<>(200, "success", resultList);
-         */
     }
 
     @ApiOperation("新增学生信息")

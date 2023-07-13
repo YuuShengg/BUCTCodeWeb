@@ -29,14 +29,16 @@ CREATE TABLE IF NOT EXISTS `codeforces` (
   `cf_date` varchar(255) DEFAULT NULL COMMENT '日期',
   PRIMARY KEY (`cf_id`) USING BTREE
 );
+
+
 CREATE TABLE IF NOT EXISTS `cfproblem` (
-                             `cf_contest_id` varchar(255) DEFAULT NULL COMMENT '比赛名称id',
-                             `cf_index` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目索引',
-                             `cf_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目名称',
-                             `cf_type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目类型',
-                             `cf_points` int DEFAULT NULL COMMENT '比赛题目得分',
-                             `cf_rating` int DEFAULT NULL COMMENT '比赛题目评级',
-                             `cf_tags` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '比赛题目标签'
+  `cf_contest_id` varchar(255) DEFAULT NULL COMMENT '比赛名称id',
+  `cf_index` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目索引',
+  `cf_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目名称',
+  `cf_type` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL COMMENT '比赛题目类型',
+  `cf_points` int DEFAULT NULL COMMENT '比赛题目得分',
+  `cf_rating` int DEFAULT NULL COMMENT '比赛题目评级',
+  `cf_tags` text CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '比赛题目标签'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `cfcontest` (
@@ -50,4 +52,36 @@ CREATE TABLE IF NOT EXISTS `cfcontest` (
                              `cf_contest_relativeTimeSeconds` int DEFAULT NULL COMMENT '比赛相对于现在的时间差',
                              `cf_contest_participantsNumber` int DEFAULT NULL COMMENT '比赛参加人数',
                              PRIMARY KEY (`cf_contest_id`)
+);
+CREATE TABLE IF NOT EXISTS `cfrating` (
+                                          `cf_contest_id` varchar(255) NOT NULL COMMENT '比赛id',
+                                          `cf_contest_name` varchar(255) DEFAULT NULL COMMENT '比赛名称',
+                                          `cf_user_id` varchar(255) DEFAULT NULL COMMENT '用户名称',
+                                          `cf_rank` varchar(255) DEFAULT NULL COMMENT '用户排名',
+                                          `cf_update_time` varchar(255) DEFAULT NULL COMMENT '更新时间',
+                                          `cf_old_rating` varchar(255) DEFAULT NULL COMMENT '旧积分',
+                                          `cf_new_rating` varchar(255) DEFAULT NULL COMMENT '新积分',
+                                          `cf_ac_number` int DEFAULT NULL COMMENT '解题数',
+                                          `cf_sc_number` int DEFAULT NULL COMMENT '补题数'
+);
+CREATE TABLE IF NOT EXISTS `accontest` (
+                                           `ac_contest_id` int NOT NULL COMMENT '比赛id',
+                                           `ac_contest_name` varchar(255) DEFAULT NULL COMMENT '比赛名称',
+                                           `ac_contest_type` varchar(255) DEFAULT NULL COMMENT '比赛类型',
+                                           `ac_contest_durationSeconds` varchar(255) DEFAULT NULL COMMENT '比赛持续时间',
+                                           `ac_contest_startTimeSeconds` varchar(255) DEFAULT NULL COMMENT '比赛开始时间',
+                                           `ac_contest_participantsNumber` int DEFAULT NULL COMMENT '比赛参加人数',
+                                           PRIMARY KEY (`ac_contest_id`)
+);
+CREATE TABLE IF NOT EXISTS `acrating` (
+                                          `ac_contest_name` varchar(255) NOT NULL COMMENT '比赛名称',
+                                          `ac_contest_date` varchar(255) NOT NULL COMMENT '比赛日期',
+                                          `ac_user_id` varchar(255) DEFAULT NULL COMMENT '用户名称',
+                                          `ac_rank` varchar(255) DEFAULT NULL COMMENT '用户排名',
+                                          `ac_performance` varchar(255) DEFAULT NULL COMMENT '用户表现',
+                                          `ac_diff` varchar(255) DEFAULT NULL COMMENT '积分变化',
+                                          `ac_old_rating` varchar(255) DEFAULT NULL COMMENT '旧积分',
+                                          `ac_new_rating` varchar(255) DEFAULT NULL COMMENT '新积分',
+                                          `ac_ac_number`  int DEFAULT NULL COMMENT '解题数',
+                                          `ac_sc_number`  int DEFAULT NULL COMMENT '补题数'
 );
