@@ -71,11 +71,12 @@ CREATE TABLE IF NOT EXISTS `accontest` (
                                            `ac_contest_durationSeconds` varchar(255) DEFAULT NULL COMMENT '比赛持续时间',
                                            `ac_contest_startTimeSeconds` varchar(255) DEFAULT NULL COMMENT '比赛开始时间',
                                            `ac_contest_participantsNumber` int DEFAULT NULL COMMENT '比赛参加人数',
+                                           `ac_contest_phase` varchar(255) DEFAULT NULL COMMENT '比赛状态',
                                            PRIMARY KEY (`ac_contest_id`)
 );
 CREATE TABLE IF NOT EXISTS `acrating` (
                                           `ac_contest_name` varchar(255) NOT NULL COMMENT '比赛名称',
-                                          `ac_contest_date` varchar(255) NOT NULL COMMENT '比赛日期',
+                                          `ac_contest_date` varchar(255) DEFAULT NULL COMMENT '比赛日期',
                                           `ac_user_id` varchar(255) DEFAULT NULL COMMENT '用户名称',
                                           `ac_rank` varchar(255) DEFAULT NULL COMMENT '用户排名',
                                           `ac_performance` varchar(255) DEFAULT NULL COMMENT '用户表现',

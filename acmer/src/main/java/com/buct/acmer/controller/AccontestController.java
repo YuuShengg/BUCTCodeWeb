@@ -1,9 +1,12 @@
 package com.buct.acmer.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.buct.acmer.entity.*;
-import com.buct.acmer.service.impl.CfcontestServiceImpl;
-import com.buct.acmer.service.impl.CfratingServiceImpl;
+import com.buct.acmer.entity.Accontest;
+import com.buct.acmer.entity.Acrating;
+import com.buct.acmer.entity.ContestStatus;
+import com.buct.acmer.entity.PublicProperty;
+import com.buct.acmer.service.impl.AccontestServiceImpl;
+import com.buct.acmer.service.impl.AcratingServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -14,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * <p>
@@ -22,44 +24,43 @@ import java.util.List;
  * </p>
  *
  * @author BUCT
- * @since 2023-07-09
+ * @since 2023-07-13
  */
-@Api(tags = "CfContest")
+@Api(tags = "AtContest")
 @RestController
-@RequestMapping("/acmer/cfcontest")
-public class CfcontestController {
+@RequestMapping("/acmer/accontest")
+public class AccontestController {
 
     @Resource
-    private CfcontestServiceImpl cfcontestService;
+    private AccontestServiceImpl accontestService;
     @Resource
-    private CfratingServiceImpl cfratingService;
+    private AcratingServiceImpl acratingService;
 
-    @ApiOperation("按开始时间降序查询所有cf竞赛信息")
+    @ApiOperation("按开始时间降序查询所有At竞赛信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
             @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true)
     })
     @GetMapping("/all/{currentPage}/{pageSize}")
-    public PublicProperty<Page<Cfcontest>> selectAll(@PathVariable("currentPage") Integer currentPage,
-                                                      @PathVariable("pageSize") Integer pageSize){
+    public PublicProperty<Page<Accontest>> selectAll(@PathVariable("currentPage") Integer currentPage,
+                                                     @PathVariable("pageSize") Integer pageSize) {
 
-        Page<Cfcontest> page = cfcontestService.selectAllOrderByStartTimeDesc(currentPage, pageSize);
-
-        return new PublicProperty(200,"success",page);
+        Page<Accontest> page = accontestService.selectAllOrderByStartTimeDesc(currentPage, pageSize);
+        return new PublicProperty(200, "success", page);
     }
 
-    @ApiOperation("按比赛Id查询某场cf竞赛参赛数据")
+    @ApiOperation("按比赛名称查询某场At竞赛参赛数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "currentPage",value = "当前页数",dataType = "int",required = true),
             @ApiImplicitParam(name = "pageSize",value = "页面大小",dataType = "int",required = true),
-            @ApiImplicitParam(name = "fieldValue",value = "比赛Id",dataType = "String",required = true)
+            @ApiImplicitParam(name = "fieldValue",value = "比赛名称",dataType = "String",required = true)
     })
     @GetMapping("/{fieldValue}/{currentPage}/{pageSize}")
     public PublicProperty<Page<ContestStatus>> selectParticipants(@PathVariable("currentPage") Integer currentPage,
-                                                             @PathVariable("pageSize") Integer pageSize,
-                                                             @PathVariable("fieldValue") String fieldValue) {
+                                                                  @PathVariable("pageSize") Integer pageSize,
+                                                                  @PathVariable("fieldValue") String fieldValue) {
 
-        Page<ContestStatus> page = cfratingService.selectParticipantsByContestId(currentPage, pageSize,fieldValue);
+        Page<ContestStatus> page = acratingService.selectParticipantsByContestName(currentPage, pageSize,fieldValue);
         return new PublicProperty(200, "success", page);
     }
 }
