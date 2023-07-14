@@ -53,5 +53,9 @@ public class Accontest implements Serializable {
      */
     private Integer acContestParticipantsnumber;
 
+    /**
+     * 比赛状态
+     */
+    private String acContestPhase;
 
 }

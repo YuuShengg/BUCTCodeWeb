@@ -71,6 +71,7 @@ public class AcContestProcess implements PageProcessor {
                 accontest.setAcContestDurationseconds(durationTime);
                 accontest.setAcContestType(type);
                 accontest.setAcContestParticipantsnumber(participantNumber);
+                accontest.setAcContestPhase("FINISHED");
 
                 String keyword = "data" + i;
                 page.putField(keyword, accontest);
@@ -101,6 +102,7 @@ public class AcContestProcess implements PageProcessor {
                 accontest.setAcContestDurationseconds(durationTime);
                 accontest.setAcContestType(type);
                 accontest.setAcContestParticipantsnumber(participantNumber);
+                accontest.setAcContestPhase("BEFORE");
 
                 // 把结果传递给pipeline
                 String keyword = "data" + j;
