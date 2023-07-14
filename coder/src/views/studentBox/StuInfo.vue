@@ -3,55 +3,45 @@
     <div style="margin-top: 2%;margin-bottom: 1%">
       <el-button type="primary" @click="addStu">新增</el-button>
     </div>
-    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe border style="width: 100%" v-loading="loading">
-      <el-table-column prop="stuNo" label="stuNo" width="120"></el-table-column>
-      <el-table-column prop="stuName" label="stuName" ></el-table-column>
-      <el-table-column prop="stuClass" label="stuClass" ></el-table-column>
-      <el-table-column prop="stuAcId" label="stuAcId" ></el-table-column>
-      <el-table-column prop="stuCfId" label="stuCfId" ></el-table-column>
-      <el-table-column  label="操作" width="100px">
-      <template slot-scope="scope">
-        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-        <el-button @click="handleDel(scope.row)" type="text" size="small">删除</el-button>
-      </template>
+    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe border
+      style="width: 100%" v-loading="loading" :cell-style="rowStyle">
+      <el-table-column prop="stuNo" label="stuNo" width="120" align="center"></el-table-column>
+      <el-table-column prop="stuName" label="stuName" align="center"></el-table-column>
+      <el-table-column prop="stuClass" label="stuClass" align="center"></el-table-column>
+      <el-table-column prop="stuAcId" label="stuAcId" align="center"></el-table-column>
+      <el-table-column prop="stuCfId" label="stuCfId" align="center"></el-table-column>
+      <el-table-column label="操作" width="100px">
+        <template slot-scope="scope">
+          <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="handleDel(scope.row)" type="text" size="small">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination
-        layout="prev, pager, next"
-        :total="totalNum"
-        :page-size="pageSize"
-        :current-page="currentPage"
-        @current-change="handleCurrentChange"
-      ></el-pagination>
+      <el-pagination layout="total,prev, pager, next" :total="totalNum" :page-size="pageSize" :current-page="currentPage"
+        @current-change="handleCurrentChange" background></el-pagination>
     </div>
-    <el-dialog
-      :visible.sync="showDialog"
-      :title="dialogtitle">
-      <el-form
-        label-width="120px"
-        ref="ruleFormRef"
-        :model="formData"
-      >
+    <el-dialog :visible.sync="showDialog" :title="dialogtitle">
+      <el-form label-width="120px" ref="ruleFormRef" :model="formData">
         <el-form-item label="学号">
-          <el-input :disabled="dialogtitle==='编辑'" v-model="formData.stuNo"></el-input>
+          <el-input :disabled="dialogtitle === '编辑'" v-model="formData.stuNo"></el-input>
         </el-form-item>
         <el-form-item label="名字">
-          <el-input  v-model="formData.stuName"></el-input>
+          <el-input v-model="formData.stuName"></el-input>
         </el-form-item>
         <el-form-item label="班级">
-          <el-input  v-model="formData.stuClass"></el-input>
+          <el-input v-model="formData.stuClass"></el-input>
         </el-form-item>
         <el-form-item label="Atcoder账号">
-          <el-input  v-model="formData.stuAcId"></el-input>
+          <el-input v-model="formData.stuAcId"></el-input>
         </el-form-item>
         <el-form-item label="Codeforces账号">
-          <el-input  v-model="formData.stuCfId"></el-input>
+          <el-input v-model="formData.stuCfId"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer">
         <el-button @click="submit"> 确认</el-button>
-        <el-button @click="showDialog=false"> 取消</el-button>
+        <el-button @click="showDialog = false"> 取消</el-button>
       </span>
     </el-dialog>
   </div>
@@ -60,7 +50,7 @@
 <script>
 import axios from 'axios'
 export default {
-  data () {
+  data() {
     return {
       pageSize: 7, // 表示一页多少条数据
       totalNum: 0,
@@ -72,12 +62,15 @@ export default {
       dialogtitle: ''
     }
   },
-  created () {
+  created() {
     this.getInfo()
   },
   methods: {
-    getInfo () {
-      axios.get('/stu/info/acmer/student/all/1/100').then(res => {
+    rowStyle() {
+      return "text-align:center";
+    },
+    getInfo() {
+      axios.get('/stu/info/acmer/student/base/1/100').then(res => {
         if (res.data.code === 200) {
           this.loading = false
           const msgInfo = res.data.data.records
@@ -95,10 +88,10 @@ export default {
         }
       })
     },
-    handleCurrentChange (val) {
+    handleCurrentChange(val) {
       this.currentPage = val
     },
-    handleEdit (data) {
+    handleEdit(data) {
       this.dialogtitle = '编辑'
 
       this.showDialog = true
@@ -106,7 +99,7 @@ export default {
         ...data
       }
     },
-    handleDel (data) {
+    handleDel(data) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -127,12 +120,12 @@ export default {
         })
       })
     },
-    addStu () {
+    addStu() {
       this.formData = {}
       this.dialogtitle = '新增'
       this.showDialog = true
     },
-    submit () {
+    submit() {
       this.showDialog = false
       if (this.dialogtitle === '新增') {
         this.$axios.post('/stu/info/acmer/student/insert', this.formData).then(res => {
@@ -158,6 +151,7 @@ export default {
   border-bottom: #eceef0 solid 2px;
   padding: 0px 18px;
 }
+
 .headBox {
   width: 100%;
   height: 75px;
@@ -165,11 +159,13 @@ export default {
   align-items: center;
   box-sizing: border-box;
 }
+
 .headBox p {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .headBox p span {
   display: inline-block;
   width: 70px;
@@ -177,18 +173,22 @@ export default {
   color: #7a7d7f;
   font-weight: bold;
 }
+
 .headBox p:nth-child(1) span,
 .headBox p:nth-child(2) span {
   margin-right: -10px;
 }
+
 .headBox p:nth-child(2) span,
 .headBox p:nth-child(3) span,
 .headBox button {
   margin-left: 7px;
 }
+
 .headBox button span {
   margin-left: 5px;
 }
+
 .container .block {
   display: flex;
   justify-content: center;

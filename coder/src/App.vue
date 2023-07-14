@@ -6,7 +6,12 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    goToNewPage() {
+      this.$router.push('/NewPage');
+    }
+  }
 }
 </script>
 
