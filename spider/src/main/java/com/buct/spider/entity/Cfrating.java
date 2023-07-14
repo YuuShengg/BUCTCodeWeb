@@ -55,5 +55,13 @@ public class Cfrating implements Serializable {
      */
     private String cfNewRating;
 
+    /**
+     * 解题数
+     */
+    private Integer cfAcNumber;
 
+    /**
+     * 补题数
+     */
+    private Integer cfScNumber;
 }

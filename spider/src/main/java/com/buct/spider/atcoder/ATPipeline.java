@@ -2,6 +2,7 @@ package com.buct.spider.atcoder;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.buct.spider.entity.Atcoder;
+import com.buct.spider.mapper.AccontestMapper;
 import com.buct.spider.mapper.AtcoderMapper;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.ResultItems;

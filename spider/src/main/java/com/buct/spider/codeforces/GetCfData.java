@@ -38,6 +38,8 @@ public class GetCfData {
                 //获取json数据
                 String data = HttpRequest.sendGet("https://codeforces.com/api/user.rating?handle=" + id);
                 JSONObject jsonObject = JSONObject.parseObject(data);
+                // 503则跳过该次访问
+                if (jsonObject == null) continue;
                 JSONArray result = jsonObject.getJSONArray("result");
                 if(result.size()!=0){
                     JSONObject newOne = result.getJSONObject(result.size()-1);
@@ -62,21 +64,36 @@ public class GetCfData {
                     }else {
                         codeforcesMapper.update(codeforces,queryWrapper);
                     }
+                } else {
+                    Codeforces codeforces = new Codeforces();
+                    codeforces.setCfId(id);
+                    codeforces.setCfContest("-");
+                    codeforces.setCfContestId("-");
+                    codeforces.setCfDate("-");
+                    codeforces.setCfRank("-");
+                    codeforces.setCfNewRating("-");
+                    codeforces.setCfOldRating("-");
+                    codeforces.setCfSumContest("-");
+                    //存入数据库中
+                    QueryWrapper<Codeforces> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("cf_id",codeforces.getCfId());
+                    Codeforces exist = codeforcesMapper.selectById(codeforces.getCfId());
+                    if(exist==null){
+                        codeforcesMapper.insert(codeforces);
+                    }else {
+                        codeforcesMapper.update(codeforces,queryWrapper);
+                    }
                 }
 
                 /**
                  *  获取用户cf积分变化表
-                 *             "contestId": 1463,
-                 *             "contestName": "Educational Codeforces Round 100 (Rated for Div. 2)",
-                 *             "handle": "zpf666",
-                 *             "rank": 5392,
-                 *             "ratingUpdateTimeSeconds": 1608222900,
-                 *             "oldRating": 0,
-                 *             "newRating": 472
+                 *
                  */
                 // 获取json数据
                 String ratingData = HttpRequest.sendGet("https://codeforces.com/api/user.rating?handle=" + id);
                 JSONObject ratingJsonObject = JSONObject.parseObject(ratingData);
+                // 503则跳过该次访问
+                if (ratingJsonObject == null) continue;
                 JSONArray ratingResult = ratingJsonObject.getJSONArray("result");
 
                 for(int j = 0; j <ratingResult.size(); j++) {
@@ -206,6 +223,7 @@ public class GetCfData {
             Integer contestRelativeTimeSeconds = contestJson.getInteger("relativeTimeSeconds");
             Integer contestParticipantsnumber = 0;
 
+            // 统计参赛人数
             if(contestPhase.equals("FINISHED")) {
                 List<Student> students = studentMapper.selectList(null);
                 for (int j = 0; j < students.size(); j++) {
@@ -219,27 +237,9 @@ public class GetCfData {
                         if(exist != null) {
                             contestParticipantsnumber++;
                         }
-
-
-                        /**
-                        String contestData = HttpRequest.sendGet("https://codeforces.com/api/contest.standings?contestId=" + contestId + "&handles=" + studentId);
-                        JSONObject contestDataJsonObject = JSONObject.parseObject(contestData);
-                        if(contestDataJsonObject == null) continue;
-                        JSONObject contestDataResult = contestDataJsonObject.getJSONObject("result");
-                    //    System.out.println("ContestResult:=========>"+contestDataResult);
-                        JSONArray rows = contestDataResult.getJSONArray("rows");
-                    //    System.out.println("rows:==========>"+rows);
-                        if (rows.size() == 0) {
-                            // continue;
-                        } else {
-                            contestParticipantsnumber++;
-                           // JSONObject row = rows.getJSONObject(0);
-                        }*/
-
                     }
                 }
             }
-
             // 创建竞赛对象并设置数据
             Cfcontest cfcontest = new Cfcontest();
             cfcontest.setCfContestId(contestId);
@@ -267,5 +267,58 @@ public class GetCfData {
         }
     }
 
+    /**
+     * 用户参与比赛的提交信息
+     */
+    public void getStatus() {
+        List<Student> students = studentMapper.selectList(null);
 
+        for (int i = 0; i < students.size(); i++) {
+            String studentId = students.get(i).getStuCfId();
+            if(studentId!=null && !studentId.equals("")) {
+                QueryWrapper<Cfrating> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("cf_user_id", studentId);
+                List<Cfrating> cfratingList = cfratingMapper.selectList(queryWrapper);
+
+                for (int j = 0; j < cfratingList.size(); j++) {
+                    String contestId = cfratingList.get(j).getCfContestId();
+                    Integer acNumber = 0;
+                    Integer scNumber = 0;
+                    if (contestId!=null && !contestId.equals("")) {
+                        String statusData = HttpRequest.sendGet("https://codeforces.com/api/contest.status?contestId=" + contestId + "&handle=" + studentId);
+                        JSONObject statusJsonObject = JSONObject.parseObject(statusData);
+                        // 503则跳过该次访问
+                        if (statusJsonObject == null) continue;
+                        JSONArray statusResult = statusJsonObject.getJSONArray("result");
+
+                        for (int k = 0; k < statusResult.size(); k++) {
+                            JSONObject resultObject = statusResult.getJSONObject(k);
+                            JSONObject problems = resultObject.getJSONObject("problem");
+                            JSONObject authors = resultObject.getJSONObject("author");
+
+                            String participantType = authors.getString("participantType");
+                            String verdict = resultObject.getString("verdict");
+
+                            if (verdict.equals("OK") && participantType.equals("CONTESTANT")) {
+                                acNumber++;
+                            } else if (verdict.equals("OK") && participantType.equals("PRACTICE")) {
+                                scNumber++;
+                            }
+                        }
+                    }
+                    Cfrating cfrating = new Cfrating();
+                    cfrating.setCfAcNumber(acNumber);
+                    cfrating.setCfScNumber(scNumber);
+
+                    QueryWrapper<Cfrating> queryWrapper1 = new QueryWrapper<>();
+                    queryWrapper1.eq("cf_user_id", studentId)
+                            .eq("cf_contest_id", contestId);
+                    Cfrating exits = cfratingMapper.selectOne(queryWrapper1);
+                    if (exits != null) {
+                        cfratingMapper.update(cfrating, queryWrapper1);
+                    }
+                }
+            }
+        }
+    }
 }
