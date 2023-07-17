@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS `student` (
    `stu_no` varchar(255) NOT NULL,
    `stu_name` varchar(255) DEFAULT NULL,
    `stu_class` varchar(255) DEFAULT NULL,
-   `stu_ac_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+   `stu_ac_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
    `stu_cf_id` varchar(255) DEFAULT NULL,
    PRIMARY KEY (`stu_no`)
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `cfrating` (
                                           `cf_sc_number` int DEFAULT NULL COMMENT '补题数'
 );
 CREATE TABLE IF NOT EXISTS `accontest` (
-                                           `ac_contest_id` int NOT NULL COMMENT '比赛id',
+                                           `ac_contest_id` int NOT NULL AUTO_INCREMENT COMMENT '比赛id',
                                            `ac_contest_name` varchar(255) DEFAULT NULL COMMENT '比赛名称',
                                            `ac_contest_type` varchar(255) DEFAULT NULL COMMENT '比赛类型',
                                            `ac_contest_durationSeconds` varchar(255) DEFAULT NULL COMMENT '比赛持续时间',
@@ -85,4 +85,16 @@ CREATE TABLE IF NOT EXISTS `acrating` (
                                           `ac_new_rating` varchar(255) DEFAULT NULL COMMENT '新积分',
                                           `ac_ac_number`  int DEFAULT NULL COMMENT '解题数',
                                           `ac_sc_number`  int DEFAULT NULL COMMENT '补题数'
+);
+CREATE TABLE IF NOT EXISTS `cfsubmission` (
+                                              `cf_submission_id` varchar(255) NOT NULL COMMENT '提交序号',
+                                              `cf_submission_date` varchar(255) DEFAULT NULL COMMENT '提交时间',
+                                              `cf_contest_id` varchar(255) DEFAULT NULL COMMENT '比赛id',
+                                              `cf_user_id` varchar(255) DEFAULT NULL COMMENT '用户名称',
+                                              `cf_problem_index` varchar(255) DEFAULT NULL COMMENT '题目下标',
+                                              `cf_problem_name` varchar(255) DEFAULT NULL COMMENT '题目名称',
+                                              `cf_submission_language`	varchar(255) DEFAULT NULL COMMENT '使用语言',
+                                              `cf_verdict` varchar(255) DEFAULT NULL COMMENT '判题结果',
+                                              `cf_submission_type` varchar(255) DEFAULT NULL COMMENT '提交方式(现场提交，补题)',
+                                              PRIMARY KEY(`cf_submission_id`)
 );

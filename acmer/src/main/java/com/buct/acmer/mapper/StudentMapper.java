@@ -17,9 +17,14 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface StudentMapper extends BaseMapper<Student> {
-    @Select("SELECT student.stu_no, student.stu_name, student.stu_class, student.stu_cf_id, student.stu_ac_id, cf.cf_new_rating, cf.cf_sum_contest, sub_query.cf_user_id, sub_query.cf_ac_number_sum, sub_query.cf_sc_number_sum " +
+    @Select("SELECT student.stu_no, student.stu_name, student.stu_class, student.stu_cf_id, student.stu_ac_id, cf.cf_new_rating, cf.cf_sum_contest, sub_query.cf_user_id, sub_query.cf_ac_number_sum, sub_query.cf_sc_number_sum, " +
+            "ac.ac_newRating, ac.ac_count, ac_query.at_ac_number_sum, ac_query.at_sc_number_sum " +
             "FROM student student " +
             "JOIN codeforces cf ON student.stu_cf_id = cf.cf_id " +
+            "JOIN atcoder ac ON student.stu_ac_id = ac.ac_id " +
+            "JOIN (SELECT acr.ac_user_id, SUM(acr.ac_ac_number) AS at_ac_number_sum, SUM(acr.ac_sc_number) AS at_sc_number_sum " +
+            "      FROM acrating acr " +
+            "      GROUP BY acr.ac_user_id) AS ac_query ON student.stu_ac_id = ac_query.ac_user_id " +
             "JOIN (SELECT cfr.cf_user_id, SUM(cfr.cf_ac_number) AS cf_ac_number_sum, SUM(cfr.cf_sc_number) AS cf_sc_number_sum " +
             "      FROM cfrating cfr " +
             "      GROUP BY cfr.cf_user_id) AS sub_query ON student.stu_cf_id = sub_query.cf_user_id")
