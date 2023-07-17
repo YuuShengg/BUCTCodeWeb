@@ -1,27 +1,44 @@
 <template>
   <div class="container">
-    <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe border height="600"
-      highlight-current-row style="width: 100%" v-loading="loading">
-      <el-table-column prop="id" label="id" width="130px"></el-table-column>
-      <el-table-column prop="date" label="date" width="210" sortable></el-table-column>
-      <el-table-column prop="contest" label="contest" width="180px"></el-table-column>
-      <el-table-column prop="rank" label="rank" sortable></el-table-column>
-      <el-table-column prop="performance" label="performance" width="120px"></el-table-column>
-      <el-table-column prop="newRating" label="newRating" width="120px"></el-table-column>
-      <el-table-column prop="diff" label="diff" width="80px"></el-table-column>
-      <el-table-column prop="count" label="count"></el-table-column>
-      <el-table-column prop="maxrating" label="maxrating" sortable></el-table-column>
-      <!--      <el-table-column  label="操作" width="100px">
-      <template slot-scope="scope">
-        <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-        <el-button @click="handleDel(scope.row)" type="text" size="small">删除</el-button>
-      </template>
-      </el-table-column>-->
-    </el-table>
-    <div class="block">
-      <el-pagination layout="total, prev, pager, next" :total="totalNum" :page-size="pageSize" :current-page="currentPage"
-        @current-change="handleCurrentChange" background></el-pagination>
-    </div>
+    <el-card class="AtCoder-card">
+      <div slot="header" class="clearfix">
+        <span>AtCoder 比赛信息</span>
+        <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
+      </div>
+      <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe border height="600"
+        highlight-current-row style="width: 100% height:fit-content;" v-loading="loading" :cell-style="rowStyle">
+        <el-table-column prop="acContestName" label="比赛名称" width="500px" :show-overflow-tooltip='true' align="center">
+          <template slot-scope="scope">
+            <el-link icon="el-icon-s-data" @click="openparticipateDialog(scope.row)">{{ scope.row.acContestName
+            }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column prop="acContestId" label="比赛编号" width="100px" align="center"></el-table-column>
+        <el-table-column prop="acContestType" label="比赛类型" width="150px" align="center"></el-table-column>
+        <el-table-column prop="acContestStarttimeseconds" label="开始时间" width="100px" align="center"></el-table-column>
+        <el-table-column prop="acContestPhase" label="当前阶段" align="center"></el-table-column>
+        <el-table-column prop="acContestDurationseconds" label="持续时间" align="center"></el-table-column>
+      </el-table>
+      <div class="block">
+        <el-pagination layout="total, prev, pager, next" :total="totalNum" :page-size="pageSize"
+          :current-page="currentPage" @current-change="handleCurrentChange" background></el-pagination>
+      </div>
+
+      <el-dialog :visible.sync="participatedialogVisible" title="参与情况" @close="clearTableData">
+        <el-table :data="participateData" stripe border height="300" highlight-current-row
+          style="width: 100% height:fit-content;" v-loading="participateloading" :cell-style="rowStyle">
+          <el-table-column prop="stuName" label="姓名" width="80px" :show-overflow-tooltip='true' align="center">
+          </el-table-column>
+          <el-table-column prop="stuAcId" label="用户名" width="150px" align="center"></el-table-column>
+          <el-table-column prop="stuClass" label="班级" width="80px" align="center"></el-table-column>
+          <el-table-column prop="ranks" label="排名" align="center" sortable></el-table-column>
+          <el-table-column prop="acNumber" label="解题数" align="center"></el-table-column>
+          <el-table-column prop="scNumber" label="补题数" align="center"></el-table-column>
+          <el-table-column prop="newRating" label="积分" align="center"></el-table-column>
+        </el-table>
+      </el-dialog>
+
+    </el-card>
   </div>
 </template>
 
@@ -34,31 +51,36 @@ export default {
       totalNum: 0,
       currentPage: 1,
       tableData: [],
-      loading: true
+      loading: true,
+      participatedialogVisible: false, // 对话框可见性
+      participateselectedRow: null, // 选中的行数据
+      participateData: [],
+      participateloading: true,
     }
   },
   created() {
     this.getInfo()
   },
   methods: {
+    clearTableData() {
+      this.participateData = []; // 清空表格数据
+    },
+    rowStyle() {
+      return "text-align:center";
+    },
     getInfo() {
-      axios.get('/stu/info/acmer/atcoder/all/1/100').then(res => {
+      axios.get('/stu/info/acmer/accontest/all/1/1000').then(res => {
         if (res.data.code === 200) {
           this.loading = false
           const msgInfo = res.data.data.records
           for (const item in msgInfo) {
-            const rank = parseInt(msgInfo[item].acRank)
-            const maxrating = parseInt(msgInfo[item].acMaxrating)
             this.tableData.push({
-              id: msgInfo[item].acId,
-              date: msgInfo[item].acDate.slice(0,19),
-              contest: msgInfo[item].acContest,
-              rank: rank,
-              performance: msgInfo[item].acPerformance,
-              newRating: msgInfo[item].acNewrating,
-              diff: msgInfo[item].acDiff,
-              count: msgInfo[item].acCount,
-              maxrating: maxrating,
+              acContestName: msgInfo[item].acContestName,
+              acContestId: msgInfo[item].acContestId,
+              acContestType: msgInfo[item].acContestType.slice(10,),
+              acContestPhase: msgInfo[item].acContestPhase,
+              acContestDurationseconds: msgInfo[item].acContestDurationseconds,
+              acContestStarttimeseconds: msgInfo[item].acContestStarttimeseconds.slice(0, 19),
             })
           }
           this.totalNum = this.tableData.length
@@ -67,7 +89,28 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val
-    }
+    },
+    openparticipateDialog(row) {//参与情况
+      this.participateselectedRow = row;
+      this.participatedialogVisible = true;
+      axios.get('/stu/info/acmer/accontest/' + this.participateselectedRow.acContestName + '/1/100').then(res => {
+        if (res.data.code === 200) {
+          this.participateloading = false
+          const msgInfo = res.data.data.records
+          for (const item in msgInfo) {
+            this.participateData.push({
+              stuName: msgInfo[item].stuName,
+              stuAcId: msgInfo[item].stuAcId,
+              stuClass: msgInfo[item].stuClass,
+              ranks: parseInt(msgInfo[item].ranks),
+              acNumber: msgInfo[item].acNumber,
+              scNumber: msgInfo[item].scNumber,
+              newRating: msgInfo[item].newRating,
+            })
+          }
+        }
+      })
+    },
   }
 }
 </script>
@@ -85,5 +128,10 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 5px;
+}
+
+.AtCoder-card {
+  margin-top: 20px;
+  margin-right: 20px;
 }
 </style>

@@ -59,7 +59,12 @@
 </template>
 
 <script>
+import StuInfo from './studentBox/StuInfo.vue'
+
 export default {
+  components: {
+    StuInfo
+  },
   data() {
     return {
       clientHeight: '',
@@ -146,25 +151,6 @@ export default {
         this.$router.replace({ path: '/StuInfo' })
       }
     },
-    getInfo() {
-      axios.get('/stu/info/acmer/student/all/1/100').then(res => {
-        if (res.data.code === 200) {
-          this.loading = false
-          const msgInfo = res.data.data.records
-          this.tableData = []
-          for (const item in msgInfo) {
-            this.tableData.push({
-              stuNo: msgInfo[item].stuNo,
-              stuName: msgInfo[item].stuName,
-              stuClass: msgInfo[item].stuClass,
-              stuAcId: msgInfo[item].stuAcId,
-              stuCfId: msgInfo[item].stuCfId
-            })
-          }
-          this.totalNum = this.tableData.length
-        }
-      })
-    },
     register() {
       this.dialogFormVisible = true; // 打开表单对话框
     },
@@ -184,34 +170,35 @@ export default {
             stuCfId: this.ruleForm.stuCfId,
           }
           this.$axios.post('/stu/info/acmer/student/insert', data).then(res => {
-            console.log(res)
-            this.getInfo()
-            alert('submit!')
-            this.ruleForm = {
-              number: '',
-              name: '',
-              gender: ''
+            if (res.data.code === 200) {
+              alert('submit !')
+              this.ruleForm = {
+                number: '',
+                name: '',
+                gender: ''
+              }
+            } else {
+              alert(res.data.message);
+              this.ruleForm = {
+                number: '',
+                name: '',
+                gender: ''
+              }
+              return false;
             }
-          }).catch(error => {
-            console.error(error);
-          });
-        } else {
-          alert('submit failed !');
-          return false;
+          })
+        }
+        else {
+          alert("error submit !");
+          this.ruleForm = {
+            number: '',
+            name: '',
+            gender: ''
+          }
         }
       });
       this.dialogFormVisible = false; // 关闭表单对话框
-    },
-    hilarity() {
-      this.$notify({
-        title: '提示',
-        message: '时间已到，你可知寸金难买寸光阴？',
-        duration: 0,
-      });
-    },
-    clickFn() {
-      this.$refs.statistic.suspend(this.stop);
-      this.stop = !this.stop;
+      this.$refs.StuInfo.getInfo();
     },
   }
 }
