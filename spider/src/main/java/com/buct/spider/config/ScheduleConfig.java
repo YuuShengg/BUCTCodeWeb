@@ -45,8 +45,15 @@ public class ScheduleConfig {
     @Resource
     private AcSubmissionPipeline acSubmissionPipeline;
 
-    @Scheduled(fixedRate = 1000*60*60*24*7)   //定时器定义，设置执行时间
-    private void AtProcess() {
+    @Scheduled(fixedRate = 1000*60*60*24*7)
+    private void AcContestProcess() {
+        // Atcoder所有比赛信息
+        Spider.create(acContestProcess)
+                .addUrl("https://atcoder.jp/contests/")
+                .addUrl("https://atcoder.jp/contests/archive")
+                .addPipeline(acContestPipeline)
+                .run();
+
         List<Student> students = studentMapper.selectList(null);
         for (int i = 0; i < students.size(); i++) {
             String id = students.get(i).getStuAcId();
@@ -61,7 +68,6 @@ public class ScheduleConfig {
                         .addUrl("https://atcoder.jp/users/"+id+"/history")
                         .addPipeline(acRatingPipeline)
                         .run();
-
                 // Atcoder解题数据
                 List<Accontest> accontests = accontestMapper.selectList(null);
                 for (int j = 0; j < accontests.size(); j++) {
@@ -82,15 +88,6 @@ public class ScheduleConfig {
             }
         }
     }
-    @Scheduled(fixedRate = 1000*60*60*24*7)
-    private void AcContestProcess() {
-        // Atcoder所有比赛信息
-        Spider.create(acContestProcess)
-                .addUrl("https://atcoder.jp/contests/")
-                .addUrl("https://atcoder.jp/contests/archive")
-                .addPipeline(acContestPipeline)
-                .run();
-    }
     @Scheduled(fixedRate = 1000*60*60*24*7)   //定时器定义，设置执行时间
     private void CfProcess() {
         getCfData.getInfo();
@@ -100,6 +97,9 @@ public class ScheduleConfig {
 
     @Scheduled(fixedRate =  1000*60*60*24*7)
     private void CfProblemProcess() { getCfData.getProblem(); }
+
+    @Scheduled(fixedRate = 1000*60*60*24*7)
+    private void CfSubmission() { getCfData.getSubmission(); }
 
 }
 

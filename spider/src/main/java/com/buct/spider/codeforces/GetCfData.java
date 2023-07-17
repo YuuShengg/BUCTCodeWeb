@@ -27,6 +27,8 @@ public class GetCfData {
     private CfcontestMapper cfcontestMapper;
     @Resource
     private CfratingMapper cfratingMapper;
+    @Resource
+    private CfsubmissionMapper cfsubmissionMapper;
     /**
      * 获取cf比赛数据，cf数据为json格式返回，不需要解析html页面
      */
@@ -268,9 +270,10 @@ public class GetCfData {
     }
 
     /**
-     * 用户参与比赛的提交信息
+     * 用户参与的比赛信息
      */
     public void getStatus() {
+
         List<Student> students = studentMapper.selectList(null);
 
         for (int i = 0; i < students.size(); i++) {
@@ -316,6 +319,66 @@ public class GetCfData {
                     Cfrating exits = cfratingMapper.selectOne(queryWrapper1);
                     if (exits != null) {
                         cfratingMapper.update(cfrating, queryWrapper1);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 用户的所有提交信息
+     */
+    public void getSubmission() {
+
+        List<Student> students = studentMapper.selectList(null);
+
+        for (int i = 0; i < students.size(); i++) {
+            String studentId = students.get(i).getStuCfId();
+            if (studentId != null && !studentId.equals("")) {
+
+                String data = HttpRequest.sendGet("https://codeforces.com/api/user.status?handle=" + studentId);
+                JSONObject jsonObject = JSONObject.parseObject(data);
+                // 503则跳过该次访问
+                if (jsonObject == null) continue;
+                JSONArray result = jsonObject.getJSONArray("result");
+
+                for (int j = 0; j <result.size(); j++) {
+                    JSONObject submissionJson = result.getJSONObject(j);
+                //    System.out.println("====================123445>>>>>>"+submissionJson);
+
+                    String submissionId = submissionJson.getString("id");
+                    String submissionDate = submissionJson.getString("creationTimeSeconds");
+                    String contestId = submissionJson.getString("contestId");
+                    String userId = studentId;
+                    JSONObject problems = submissionJson.getJSONObject("problem");
+                    String problemIndex = problems.getString("index");
+                    String problemName = problems.getString("name");
+                    String submissionLanguage = submissionJson.getString("programmingLanguage");
+                    String verdict = submissionJson.getString("verdict");
+                    JSONObject authors = submissionJson.getJSONObject("author");
+                    String submissionType = authors.getString("participantType");
+                //    System.out.println("==================>>>>>"+submissionType);
+
+                    Cfsubmission cfsubmission = new Cfsubmission();
+                    cfsubmission.setCfSubmissionId(submissionId);
+                    cfsubmission.setCfSubmissionDate(submissionDate);
+                    cfsubmission.setCfContestId(contestId);
+                    cfsubmission.setCfUserId(userId);
+                    cfsubmission.setCfProblemIndex(problemIndex);
+                    cfsubmission.setCfProblemName(problemName);
+                    cfsubmission.setCfSubmissionLanguage(submissionLanguage);
+                    cfsubmission.setCfVerdict(verdict);
+                    if(submissionType.equals("CONTESTANT"))
+                        cfsubmission.setCfSubmissionType("现场提交");
+                    else cfsubmission.setCfSubmissionType("补题");
+
+                    QueryWrapper<Cfsubmission> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("cf_submission_id", cfsubmission.getCfSubmissionId());
+                    Cfsubmission exists = cfsubmissionMapper.selectOne(queryWrapper);
+                    if(exists == null) {
+                        cfsubmissionMapper.insert(cfsubmission);
+                    } else {
+                        cfsubmissionMapper.update(cfsubmission, queryWrapper);
                     }
                 }
             }

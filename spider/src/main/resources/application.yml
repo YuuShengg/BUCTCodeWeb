@@ -2,9 +2,11 @@ spring:
   #数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/acmer?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true
+    # 本地127.0.0.1:3306
+    url: jdbc:mysql://39.101.68.205:3306/acmer?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true
     username: root
-    password: 20020326
+    password: 12345678
+    # 本地20020326
   task:
     scheduling:
       pool:
