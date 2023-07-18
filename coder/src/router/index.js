@@ -5,6 +5,8 @@ import SelectAll from '../views/studentBox/SelectAll.vue'
 import StuInfo from '../views/studentBox/StuInfo'
 import Home from '../views/Home.vue'
 import CodeforcesInfo from '../views/studentBox/CodeforcesInfo.vue'
+import CodeforcesProblem from '../views/studentBox/CodeforcesProblem.vue'
+
 
 Vue.use(VueRouter)
 
@@ -38,6 +40,10 @@ const routes = [{
     path: '/CodeforcesInfo',
     name: 'CodeforcesInfo',
     component: CodeforcesInfo
+  }, {
+    path: '/CodeforcesProblem',
+    name: 'CodeforcesProblem',
+    component: CodeforcesProblem
   }
   ]
 }, 

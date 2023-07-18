@@ -5,7 +5,7 @@
       <el-col :span="12" class="navBox">
         <el-menu :default-active="defaultActive" class="el-menu-vertical-demo" background-color="#243946"
           text-color="#96afbe" active-text-color="#ffffff">
-          <h2>BUCTCODER</h2>
+          <div id="main" style="width: 200px; height: 50px; margin: 10px;"></div>
           <el-menu-item index="1" @click="goHome()">
             <i class="el-icon-s-home"></i>
             <span slot="title">Home</span>
@@ -54,17 +54,16 @@
         <el-button type="primary" @click="submitRegistration('ruleForm')">确 定</el-button>
       </div>
     </el-dialog>
+    <child ref="StuInfo" />
     <router-view class="right_bottom"></router-view>
   </div>
 </template>
 
 <script>
-import StuInfo from './studentBox/StuInfo.vue'
+import StuInfo from "./studentBox/StuInfo"
+import * as echarts from 'echarts'
 
 export default {
-  components: {
-    StuInfo
-  },
   data() {
     return {
       clientHeight: '',
@@ -108,6 +107,61 @@ export default {
     }
   },
   mounted() {
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    var option;
+
+    option = {
+      graphic: {
+        elements: [
+          {
+            type: 'text',
+            left: 'center',
+            top: 'center',
+            style: {
+              text: 'BUCTCODER',
+              fontSize: 30,
+              fontWeight: 'bold',
+              lineDash: [0, 100],
+              lineDashOffset: 0,
+              fill: 'transparent',
+              stroke: '#fff',
+              lineWidth: 1
+            },
+            keyframeAnimation: {
+              duration: 3000,
+              loop: true,
+              keyframes: [
+                {
+                  percent: 0.7,
+                  style: {
+                    fill: 'transparent',
+                    lineDashOffset: 200,
+                    lineDash: [200, 0]
+                  }
+                },
+                {
+                  // Stop for a while.
+                  percent: 0.8,
+                  style: {
+                    fill: 'white'
+                  }
+                },
+                {
+                  percent: 1,
+                  style: {
+                    fill: 'white'
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    };
+
+    option && myChart.setOption(option);
+
     // 获取浏览器可视区域高度
     this.clientHeight = `${document.documentElement.clientHeight}`
     const that = this
@@ -158,7 +212,6 @@ export default {
       // 处理表单提交逻辑
       // 可以在这里使用 this.form 对象中的值进行进一步处理或提交到后端
       // 例如：发送 API 请求进行注册
-      console.log('表单提交', this.form);
 
       this.$refs[ruleForm].validate((valid) => {
         if (valid) {
@@ -172,33 +225,40 @@ export default {
           this.$axios.post('/stu/info/acmer/student/insert', data).then(res => {
             if (res.data.code === 200) {
               alert('submit !')
+              StuInfo.methods.getInfo()
               this.ruleForm = {
-                number: '',
-                name: '',
-                gender: ''
+                stuNo: '',
+                stuName: '',
+                stuClass: '',
+                stuAcId: '',
+                stuCfId: '',
               }
             } else {
-              alert(res.data.message);
+              alert(res.data.message)
               this.ruleForm = {
-                number: '',
-                name: '',
-                gender: ''
+                stuNo: '',
+                stuName: '',
+                stuClass: '',
+                stuAcId: '',
+                stuCfId: '',
               }
               return false;
             }
           })
         }
         else {
-          alert("error submit !");
+          alert("error submit !")
           this.ruleForm = {
-            number: '',
-            name: '',
-            gender: ''
+            stuNo: '',
+            stuName: '',
+            stuClass: '',
+            stuAcId: '',
+            stuCfId: '',
           }
         }
       });
-      this.dialogFormVisible = false; // 关闭表单对话框
-      this.$refs.StuInfo.getInfo();
+      this.dialogFormVisible = false // 关闭表单对话框
+      this.$refs.StuInfo.getInfo()
     },
   }
 }

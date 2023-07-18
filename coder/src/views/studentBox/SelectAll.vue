@@ -18,6 +18,7 @@
         <el-table-column prop="acContestStarttimeseconds" label="开始时间" width="100px" align="center"></el-table-column>
         <el-table-column prop="acContestPhase" label="当前阶段" align="center"></el-table-column>
         <el-table-column prop="acContestDurationseconds" label="持续时间" align="center"></el-table-column>
+        <el-table-column prop="acContestParticipantsnumber" label="参与人数" align="center"></el-table-column>
       </el-table>
       <div class="block">
         <el-pagination layout="total, prev, pager, next" :total="totalNum" :page-size="pageSize"
@@ -81,6 +82,7 @@ export default {
               acContestPhase: msgInfo[item].acContestPhase,
               acContestDurationseconds: msgInfo[item].acContestDurationseconds,
               acContestStarttimeseconds: msgInfo[item].acContestStarttimeseconds.slice(0, 19),
+              acContestParticipantsnumber: msgInfo[item].acContestParticipantsnumber,
             })
           }
           this.totalNum = this.tableData.length
