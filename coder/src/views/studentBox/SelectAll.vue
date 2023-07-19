@@ -3,7 +3,6 @@
     <el-card class="AtCoder-card">
       <div slot="header" class="clearfix">
         <span>AtCoder 比赛信息</span>
-        <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
       </div>
       <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)" stripe border height="600"
         highlight-current-row style="width: 100% height:fit-content;" v-loading="loading" :cell-style="rowStyle">

@@ -5,7 +5,6 @@
                 <el-card class="studentbox-card">
                     <div slot="header" class="clearfix">
                         <span>学生数据统计</span>
-                        <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
                     </div>
                     <el-table
                         :data="studenttableData.slice((studentcurrentPage - 1) * studentpageSize, studentcurrentPage * studentpageSize)"
@@ -50,12 +49,13 @@
                         fullscreen="true">
                         <el-tabs v-model="onset">
                             <el-tab-pane label="Codeforces 比赛情况" name="first">
+                                <!-- 积分图 -->
                                 <div id="Cfchart"
                                     style="display: flex; justify-content: center; width: 1400px; height: 400px;"></div>
-
-                                <el-table :data="personalCfData" stripe border height="600" highlight-current-row
-                                    style="width: 100% height:fit-content;" v-loading="personalCfloading"
-                                    :cell-style="rowStyle">
+                                <el-table
+                                    :data="personalCfData.slice((personalCfcurrentPage - 1) * personalCfpageSize, personalCfcurrentPage * personalCfpageSize)"
+                                    stripe border height="500" highlight-current-row style="width: 100% height:fit-content;"
+                                    v-loading="personalCfloading" :cell-style="rowStyle">
                                     <el-table-column prop="cfUserId" label="用户名" width="200px" :show-overflow-tooltip='true'
                                         align="center">
                                     </el-table-column>
@@ -75,14 +75,20 @@
                                     <el-table-column prop="change" label="积分变化" width="80px"
                                         align="center"></el-table-column>
                                 </el-table>
+                                <div class="block">
+                                    <el-pagination layout="total, prev, pager, next" :total="personalCftotalNum"
+                                        :page-size="personalCfpageSize" :current-page="personalCfcurrentPage"
+                                        @current-change="handlepersonalCfCurrentChange" background></el-pagination>
+                                </div>
                             </el-tab-pane>
 
                             <el-tab-pane label="AtCoder 比赛情况" name="second">
                                 <div id="ACchart"
                                     style="display: flex; justify-content: center; width: 1400px; height: 400px;"></div>
-                                <el-table :data="personalACData" stripe border height="600" highlight-current-row
-                                    style="width: 100% height:fit-content;" v-loading="personalACloading"
-                                    :cell-style="rowStyle">
+                                <el-table
+                                    :data="personalACData.slice((personalACcurrentPage - 1) * personalACpageSize, personalACcurrentPage * personalACpageSize)"
+                                    stripe border height="500" highlight-current-row style="width: 100% height:fit-content;"
+                                    v-loading="personalACloading" :cell-style="rowStyle">
                                     <el-table-column prop="acUserId" label="用户名" width="200px" :show-overflow-tooltip='true'
                                         align="center">
                                     </el-table-column>
@@ -98,12 +104,18 @@
                                     <el-table-column prop="acDiff" label="积分变化" width="80px"
                                         align="center"></el-table-column>
                                 </el-table>
+                                <div class="block">
+                                    <el-pagination layout="total, prev, pager, next" :total="personalACtotalNum"
+                                        :page-size="personalACpageSize" :current-page="personalACcurrentPage"
+                                        @current-change="handlepersonalACCurrentChange" background></el-pagination>
+                                </div>
                             </el-tab-pane>
 
                             <el-tab-pane label="所有提交记录" name="third">
-                                <el-table :data="submitData" stripe border height="600" highlight-current-row
-                                    style="width: 100% height:fit-content;" v-loading="submitloading"
-                                    :cell-style="rowStyle">
+                                <el-table
+                                    :data="submitData.slice((submitcurrentPage - 1) * submitpageSize, submitcurrentPage * submitpageSize)"
+                                    stripe border height="500" highlight-current-row style="width: 100% height:fit-content;"
+                                    v-loading="submitloading" :cell-style="rowStyle">
                                     <el-table-column prop="cfSubmissionId" label="提交序号" width="100px" align="center">
                                     </el-table-column>
                                     <el-table-column prop="cfUserId" label="用户" width="200px" :show-overflow-tooltip='true'
@@ -120,6 +132,11 @@
                                     <el-table-column prop="cfVerdict" label="结果" align="center"
                                         :show-overflow-tooltip='true'></el-table-column>
                                 </el-table>
+                                <div class="block">
+                                    <el-pagination layout="total, prev, pager, next" :total="submittotalNum"
+                                        :page-size="submitpageSize" :current-page="submitcurrentPage"
+                                        @current-change="handlesubmitCurrentChange" background></el-pagination>
+                                </div>
                             </el-tab-pane>
                         </el-tabs>
                     </el-dialog>
@@ -140,7 +157,6 @@
                     <el-card class="contestbox-card">
                         <div slot="header" class="clearfix">
                             <span>近期比赛</span>
-                            <el-button style="float: right; padding: 3px 0" type="text">操作按钮</el-button>
                         </div>
                         <el-table
                             :data="contesttableData.slice((contestcurrentPage - 1) * contestpageSize, contestcurrentPage * contestpageSize)"
@@ -200,15 +216,26 @@ export default {
 
             submitdialogVisible: false, // 对话框可见性
             submitselectedRow: null, // 选中的行数据
+            submitpageSize: 10, // 表示一页多少条数据
+            submittotalNum: 0,
+            submitcurrentPage: 1,
             submitData: [],
             submitloading: true,
 
             gotoContestRow: null,
 
+            personalCfpageSize: 10, // 表示一页多少条数据
+            personalCftotalNum: 0,
+            personalCfcurrentPage: 1,
             personalCfData: [],
             personalCfloading: true,
+
+            personalACpageSize: 10, // 表示一页多少条数据
+            personalACtotalNum: 0,
+            personalACcurrentPage: 1,
             personalACData: [],
             personalACloading: true,
+
             person: null,
             onset: 'first',
             CfchartData: [],
@@ -288,11 +315,21 @@ export default {
         handlecontestCurrentChange(val) {
             this.contestcurrentPage = val
         },
+        handlesubmitCurrentChange(val) {
+            this.submitcurrentPage = val
+        },
+        handlepersonalCfCurrentChange(val) {
+            this.personalCfcurrentPage = val
+        },
+        handlepersonalACCurrentChange(val) {
+            this.personalACcurrentPage = val
+        },
         opensubmitDialog(row) {//提交情况
             this.submitselectedRow = row
             this.submitdialogVisible = true
             this.person = this.submitselectedRow.stuName + " 个人数据"
-
+            this.CfchartData = [];// 清空图表数据
+            this.ACchartData = [];// 清空图表数据
             axios.get('/stu/info/acmer/cfsubmission/' + this.submitselectedRow.stuNo + '/1/100').then(res => {
                 if (res.data.code === 200) {
                     this.submitloading = false
@@ -309,6 +346,7 @@ export default {
                             cfContestId: parseInt(msgInfo[item].cfContestId),
                         })
                     }
+                    this.submittotalNum = this.submitData.length
                 }
             })
             axios.get('/stu/info/acmer/cfrating/all/select/1/1000/cf_user_id/' + this.submitselectedRow.stuCfId).then(res => {
@@ -329,6 +367,63 @@ export default {
                         })
                         this.CfchartData.push([msgInfo[item].cfUpdateTime, parseInt(msgInfo[item].cfNewRating)])
                     }
+                    this.personalCftotalNum = this.personalCfData.length
+                    var CfchartDom = document.getElementById('Cfchart');
+                    var myCfChart = echarts.init(CfchartDom);
+                    var Cfoption;
+
+                    Cfoption = {
+                        tooltip: {
+                            trigger: 'axis',
+                            position: function (pt) {
+                                return [pt[0], '10%'];
+                            }
+                        },
+                        title: {
+                            left: 'center',
+                            text: '积分变化'
+                        },
+                        toolbox: {
+                            feature: {
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'time',
+                            min: 'dataMin',
+                            name: '日期'
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: '积分',
+                        },
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                start: 0,
+                                end: 100,
+                                filterMode: 'none',
+                            },
+                            {
+                                start: 0,
+                                end: 20
+                            }
+                        ],
+                        series: [
+                            {
+                                name: 'Rating',
+                                type: 'line',
+                                smooth: false,
+                                clip: true,
+                                data: this.CfchartData,
+                                animation: true,
+                                emphasis: {
+                                    scale: 2,
+                                }
+                            }
+                        ]
+                    };
+                    Cfoption && myCfChart.setOption(Cfoption);
                 }
             })
             axios.get('/stu/info/acmer/acrating/all/select/1/100/ac_user_id/' + this.submitselectedRow.stuAcId).then(res => {
@@ -347,123 +442,65 @@ export default {
                         })
                         this.ACchartData.push([msgInfo[item].acContestDate, parseInt(msgInfo[item].acNewRating)])
                     }
+                    this.personalACtotalNum = this.personalACData.length
+                    var ACchartDom = document.getElementById('ACchart');
+                    var myACChart = echarts.init(ACchartDom);
+                    var ACoption;
+
+                    ACoption = {
+                        tooltip: {
+                            trigger: 'axis',
+                            position: function (pt) {
+                                return [pt[0], '10%'];
+                            }
+                        },
+                        title: {
+                            left: 'center',
+                            text: '积分变化'
+                        },
+                        toolbox: {
+                            feature: {
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'time',
+                            min: 'dataMin',
+                            name: '日期'
+                        },
+                        yAxis: {
+                            type: 'value',
+                            name: '积分',
+                        },
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                start: 0,
+                                end: 100,
+                                filterMode: 'none',
+                            },
+                            {
+                                start: 0,
+                                end: 20
+                            }
+                        ],
+                        series: [
+                            {
+                                name: 'Rating',
+                                type: 'line',
+                                smooth: false,
+                                clip: true,
+                                data: this.ACchartData,
+                                animation: true,
+                                emphasis: {
+                                    scale: 2,
+                                }
+                            }
+                        ]
+                    };
+                    ACoption && myACChart.setOption(ACoption);
                 }
             })
-
-            var CfchartDom = document.getElementById('Cfchart');
-            var myCfChart = echarts.init(CfchartDom);
-            var Cfoption;
-
-            Cfoption = {
-                tooltip: {
-                    trigger: 'axis',
-                    position: function (pt) {
-                        return [pt[0], '10%'];
-                    }
-                },
-                title: {
-                    left: 'center',
-                    text: '积分变化'
-                },
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
-                        saveAsImage: {}
-                    }
-                },
-                xAxis: {
-                    type: 'time',
-                    boundaryGap: [0, '100%']
-                },
-                yAxis: {
-                    type: 'value',
-                    boundaryGap: [0, '100%']
-                },
-                dataZoom: [
-                    {
-                        type: 'inside',
-                        start: 0,
-                        end: 20
-                    },
-                    {
-                        start: 0,
-                        end: 20
-                    }
-                ],
-                series: [
-                    {
-                        name: 'Fake Data',
-                        type: 'line',
-                        smooth: false,
-                        symbol: 'none',
-                        areaStyle: {},
-                        data: this.CfchartData
-                    }
-                ]
-            };
-
-            Cfoption && myCfChart.setOption(Cfoption);
-
-            var ACchartDom = document.getElementById('ACchart');
-            var myACChart = echarts.init(ACchartDom);
-            var ACoption;
-
-            ACoption = {
-                tooltip: {
-                    trigger: 'axis',
-                    position: function (pt) {
-                        return [pt[0], '10%'];
-                    }
-                },
-                title: {
-                    left: 'center',
-                    text: '积分变化'
-                },
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
-                        saveAsImage: {}
-                    }
-                },
-                xAxis: {
-                    type: 'time',
-                    boundaryGap: false
-                },
-                yAxis: {
-                    type: 'value',
-                    boundaryGap: [0, '100%']
-                },
-                dataZoom: [
-                    {
-                        type: 'inside',
-                        start: 0,
-                        end: 20
-                    },
-                    {
-                        start: 0,
-                        end: 20
-                    }
-                ],
-                series: [
-                    {
-                        name: 'Fake Data',
-                        type: 'line',
-                        smooth: false,
-                        symbol: 'none',
-                        areaStyle: {},
-                        data: this.ACchartData
-                    }
-                ]
-            };
-
-            ACoption && myACChart.setOption(ACoption);
-
         },
         gotoContest(row) {
             this.gotoContestRow = row;
@@ -521,5 +558,4 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: 5px;
-}
-</style>
+}</style>
